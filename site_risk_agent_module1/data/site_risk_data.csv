@@ -1,0 +1,13 @@
+risk_id,zone,activity,hazard,severity,risk_type,risk_score,detected_at
+ZR-01,North Zone,Excavation,Open excavation near walkway,High,Site Condition,78,2026-08-31 08:10
+ZR-02,North Zone,Equipment,Excavator operating near personnel,High,Equipment Hazard,84,2026-08-31 08:25
+ZR-03,East Zone,Environmental,High dust concentration,Medium,Environmental,62,2026-08-31 08:40
+ZR-04,East Zone,Material Storage,Unsecured material stack,Medium,Site Condition,58,2026-08-31 08:55
+ZR-05,South Zone,Electrical,Temporary cable exposed,High,Site Condition,81,2026-08-31 09:05
+ZR-06,South Zone,Equipment,Forklift movement in restricted area,High,Equipment Hazard,88,2026-08-31 09:12
+ZR-07,West Zone,Environmental,Excessive noise level,Low,Environmental,38,2026-08-31 09:18
+ZR-08,West Zone,Housekeeping,Debris blocking access path,Medium,Site Condition,55,2026-08-31 09:22
+ZR-09,Central Zone,Equipment,Crane load movement detected,High,Equipment Hazard,91,2026-08-31 09:27
+ZR-10,Central Zone,Environmental,High temperature exposure,Medium,Environmental,64,2026-08-31 09:30
+ZR-11,North Zone,Housekeeping,Wet/slippery floor area,Medium,Site Condition,51,2026-08-31 09:33
+ZR-12,West Zone,Equipment,Heavy vehicle reversing activity,High,Equipment Hazard,76,2026-08-31 09:38
