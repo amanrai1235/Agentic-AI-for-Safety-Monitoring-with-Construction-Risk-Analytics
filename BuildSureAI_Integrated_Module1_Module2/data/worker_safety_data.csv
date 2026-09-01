@@ -1,0 +1,16 @@
+incident_id,zone,worker_id,ppe_type,compliance_status,violation_type,safety_score
+S-001,North Zone,Worker-101,Hard Hat,Compliant,None,95
+S-002,North Zone,Worker-102,Safety Vest,Compliant,None,92
+S-003,North Zone,Worker-103,Safety Boots,Violation,Missing PPE,62
+S-004,East Zone,Worker-104,Safety Harness,Violation,Working at height without harness,42
+S-005,East Zone,Worker-105,Hard Hat,Compliant,None,96
+S-006,East Zone,Worker-106,Protective Gloves,Violation,Missing PPE,68
+S-007,South Zone,Worker-107,Safety Vest,Compliant,None,94
+S-008,South Zone,Worker-108,Hard Hat,Violation,Missing PPE,58
+S-009,South Zone,Worker-109,Safety Harness,Violation,Unsafe behavior,48
+S-010,West Zone,Worker-110,Safety Boots,Compliant,None,91
+S-011,West Zone,Worker-111,Protective Gloves,Compliant,None,89
+S-012,West Zone,Worker-112,Hard Hat,Violation,Unsafe behavior,55
+S-013,Central Zone,Worker-113,Safety Vest,Compliant,None,97
+S-014,Central Zone,Worker-114,Safety Harness,Violation,Missing PPE,45
+S-015,Central Zone,Worker-115,Hard Hat,Violation,Unsafe behavior,52
