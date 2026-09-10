@@ -12,6 +12,7 @@ st.set_page_config(
 BASE = Path(__file__).parent / "data"
 site = pd.read_csv(BASE / "site_risk_data.csv")
 safety = pd.read_csv(BASE / "worker_safety_data.csv")
+compliance = pd.read_csv(BASE / "compliance_data.csv")
 
 # ------------------ Styling ------------------
 st.markdown("""
@@ -50,46 +51,53 @@ st.sidebar.caption("Construction Risk Intelligence Platform")
 
 page = st.sidebar.radio(
     "Navigate",
-    ["Executive Overview", "Module 1 — Site Risk", "Module 2 — Safety Intelligence"]
+    ["Executive Overview", "Module 1 — Site Risk", "Module 2 — Safety Intelligence", "Module 3 — Compliance Intelligence"]
 )
 
 st.sidebar.divider()
-st.sidebar.caption("Current implementation: Modules 1–2")
+st.sidebar.caption("Current implementation: Modules 1–3")
 
 # ------------------ Executive Overview ------------------
 if page == "Executive Overview":
     st.markdown("""
     <div class="hero">
         <h1>🏗️ BuildSure AI</h1>
-        <p>Agentic Construction Risk Intelligence Platform • Modules 1–2</p>
+        <p>Agentic Construction Risk Intelligence Platform • Modules 1–3</p>
     </div>
     """, unsafe_allow_html=True)
 
     site_score = round(site["risk_score"].mean())
     safety_score = round(safety["safety_score"].mean())
-    violations = int((safety["compliance_status"] == "Violation").sum())
-    compliance = round((1 - violations / len(safety)) * 100)
+    safety_violations = int((safety["compliance_status"] == "Violation").sum())
+    ppe_compliance = round((1 - safety_violations / len(safety)) * 100) if len(safety) else 0
+    compliance_ok = int((compliance["compliance_status"] == "Compliant").sum())
+    compliance_rate = round((compliance_ok / len(compliance)) * 100) if len(compliance) else 0
+    compliance_violations = int((compliance["compliance_status"] == "Violation").sum())
+    pending_reviews = int((compliance["compliance_status"] == "Pending Review").sum())
 
-    k1,k2,k3,k4 = st.columns(4)
+    k1,k2,k3,k4,k5 = st.columns(5)
     for c,l,v,n in [
         (k1,"Site Risk Score",f"{site_score}/100","Module 1"),
         (k2,"Active Site Risks",len(site),"Module 1"),
-        (k3,"Safety Violations",violations,"Module 2"),
-        (k4,"PPE Compliance",f"{compliance}%","Module 2"),
+        (k3,"Safety Violations",safety_violations,"Module 2"),
+        (k4,"PPE Compliance",f"{ppe_compliance}%","Module 2"),
+        (k5,"Compliance Score",f"{compliance_rate}%","Module 3"),
     ]:
         c.markdown(f'<div class="kpi"><div class="kpi-label">{l}</div><div class="kpi-value">{v}</div><div class="kpi-note">{n}</div></div>', unsafe_allow_html=True)
 
     st.subheader("Platform Modules")
-    c1,c2 = st.columns(2)
+    c1,c2,c3 = st.columns(3)
     with c1:
         st.info("### Module 1 — Site Risk Agent\n\nSite-condition monitoring, environmental risk assessment, equipment hazard detection and site risk scoring.")
     with c2:
         st.info("### Module 2 — Safety Agent\n\nWorker safety compliance, PPE violation detection, unsafe behavior analysis, accident-prone zone analysis and safety recommendations.")
+    with c3:
+        st.info("### Module 3 — Compliance Agent\n\nRegulatory compliance validation, construction-standard monitoring, policy-violation detection, inspection tracking and compliance reporting.")
 
-    st.subheader("Integrated Risk View")
+    st.subheader("Integrated Risk & Compliance View")
     combined = pd.DataFrame({
-        "Metric": ["Site Risk Score","Safety Score","PPE Compliance"],
-        "Value": [site_score, safety_score, compliance]
+        "Metric": ["Site Risk Score","Safety Score","PPE Compliance","Compliance Score"],
+        "Value": [site_score, safety_score, ppe_compliance, compliance_rate]
     }).set_index("Metric")
     st.bar_chart(combined)
 
@@ -149,7 +157,7 @@ elif page == "Module 1 — Site Risk":
         st.warning(f"Priority hazard: **{top.hazard}** in **{top.zone}** — risk score **{top.risk_score}/100**.")
 
 # ------------------ Module 2 ------------------
-else:
+elif page == "Module 2 — Safety Intelligence":
     st.markdown("""
     <div class="hero">
         <span class="module-pill">MODULE 2</span>
@@ -204,4 +212,112 @@ else:
     else:
         st.success("No safety violations found for the selected filters.")
 
-st.caption("BuildSure AI • Current prototype includes Module 1 and Module 2. Data shown is structured demonstration data.")
+# ------------------ Module 3 ------------------
+else:
+    st.markdown("""
+    <div class="hero">
+        <span class="module-pill">MODULE 3</span>
+        <h1>📋 Compliance Intelligence</h1>
+        <p>Compliance Agent • Regulatory Validation, Inspections & Policy Monitoring</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.info("Demo mode: the compliance records below are structured demonstration data created for the Module 3 prototype. Replace them later with verified project/regulatory data.")
+
+    regulations = ["All Regulations"] + sorted(compliance.regulation.unique())
+    categories = ["All Categories"] + sorted(compliance.category.unique())
+    statuses = ["Compliant", "Violation", "Pending Review"]
+    zones = ["All Zones"] + sorted(compliance.zone.unique())
+
+    c1, c2, c3, c4 = st.columns(4)
+    with c1: reg = st.selectbox("Regulation", regulations)
+    with c2: cat = st.selectbox("Compliance Category", categories)
+    with c3: zone = st.selectbox("Site Zone", zones)
+    with c4: status_filter = st.multiselect("Status", statuses, statuses)
+
+    f = compliance.copy()
+    if reg != "All Regulations": f = f[f.regulation == reg]
+    if cat != "All Categories": f = f[f.category == cat]
+    if zone != "All Zones": f = f[f.zone == zone]
+    f = f[f.compliance_status.isin(status_filter)]
+
+    total = len(f)
+    compliant = int((f.compliance_status == "Compliant").sum())
+    violations = int((f.compliance_status == "Violation").sum())
+    pending = int((f.compliance_status == "Pending Review").sum())
+    compliance_rate = round((compliant / total) * 100) if total else 0
+    open_actions = int(f[f.action_required == "Yes"].shape[0]) if total else 0
+
+    k1,k2,k3,k4,k5=st.columns(5)
+    for c,l,v,n in [
+        (k1,"Compliance Score",f"{compliance_rate}%","Higher = better"),
+        (k2,"Open Violations",violations,"Policy / standard violations"),
+        (k3,"Pending Reviews",pending,"Items awaiting validation"),
+        (k4,"Inspections Tracked",int(f.inspection_required.sum()) if total else 0,"Inspection requirements"),
+        (k5,"Open Actions",open_actions,"Items requiring action"),
+    ]:
+        c.markdown(f'<div class="kpi"><div class="kpi-label">{l}</div><div class="kpi-value">{v}</div><div class="kpi-note">{n}</div></div>', unsafe_allow_html=True)
+
+    st.divider()
+    a,b=st.columns([1.15,1])
+    with a:
+        st.subheader("Compliance Status by Category")
+        status_chart = f.groupby(["category","compliance_status"]).size().unstack(fill_value=0) if total else pd.DataFrame()
+        if not status_chart.empty:
+            st.bar_chart(status_chart)
+        else:
+            st.info("No records match the selected filters.")
+    with b:
+        st.subheader("Inspection Tracking")
+        inspection = f.groupby("inspection_status").size() if total else pd.Series(dtype=int)
+        if not inspection.empty:
+            st.bar_chart(inspection)
+        else:
+            st.info("No inspection records match the selected filters.")
+
+    st.subheader("Compliance Overview")
+    overview = f.groupby("category").agg(
+        Requirements=("requirement","count"),
+        Compliant=("compliance_status", lambda x: (x=="Compliant").sum()),
+        Violations=("compliance_status", lambda x: (x=="Violation").sum()),
+        Pending=("compliance_status", lambda x: (x=="Pending Review").sum()),
+    ).reset_index()
+    if not overview.empty:
+        overview["Compliance %"] = (overview["Compliant"] / overview["Requirements"] * 100).round(0).astype(int)
+        st.dataframe(overview, use_container_width=True, hide_index=True)
+
+    st.subheader("Policy Violations & Required Actions")
+    issues = f[f.compliance_status != "Compliant"].copy()
+    if not issues.empty:
+        issues = issues.sort_values(["priority","due_date"], ascending=[True, True])
+        st.dataframe(issues[["requirement","regulation","category","zone","compliance_status","inspection_status","priority","action_required","due_date"]], use_container_width=True, hide_index=True)
+    else:
+        st.success("No violations or pending reviews found for the selected filters.")
+
+    st.subheader("Inspection Requirements")
+    inspection_df = f[f.inspection_required].copy()
+    if not inspection_df.empty:
+        st.dataframe(inspection_df[["requirement","zone","inspection_status","last_inspection","next_inspection","inspection_owner"]], use_container_width=True, hide_index=True)
+    else:
+        st.info("No inspection requirements found for the selected filters.")
+
+    st.subheader("Compliance Agent Assessment")
+    if not issues.empty:
+        critical = issues.sort_values("priority").iloc[0]
+        if critical["compliance_status"] == "Violation":
+            st.error(f"Priority violation: **{critical.requirement}** in **{critical.zone}**. Action required: **{critical.action_required}** by **{critical.due_date}**.")
+        else:
+            st.warning(f"Priority review: **{critical.requirement}** in **{critical.zone}** is **Pending Review**. Validate the requirement and close the inspection workflow.")
+        st.info("Compliance Agent workflow: validate the requirement → identify the status → track inspection → flag violations → record the corrective action → generate the compliance report.")
+    else:
+        st.success("All selected compliance requirements are currently marked compliant.")
+
+    st.subheader("Generate Compliance Report")
+    report = f.copy()
+    if not report.empty:
+        report_cols=["requirement","regulation","category","zone","compliance_status","inspection_status","priority","action_required","due_date"]
+        st.download_button("⬇️ Download Filtered Compliance Report (CSV)", report[report_cols].to_csv(index=False), "buildsure_compliance_report.csv", "text/csv")
+    else:
+        st.button("⬇️ Download Filtered Compliance Report (CSV)", disabled=True)
+
+st.caption("BuildSure AI • Unified dashboard for Modules 1, 2 and 3. Data shown is structured demonstration data.")
