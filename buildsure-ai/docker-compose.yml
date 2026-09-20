@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: buildsure
+      POSTGRES_PASSWORD: buildsure
+      POSTGRES_DB: buildsure
+    ports: ["5432:5432"]
+    volumes: ["buildsure_db:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U buildsure"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://buildsure:buildsure@db:5432/buildsure
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports: ["8000:8000"]
+
+  web:
+    build: ./frontend
+    depends_on: [api]
+    ports: ["3000:80"]
+
+volumes:
+  buildsure_db:

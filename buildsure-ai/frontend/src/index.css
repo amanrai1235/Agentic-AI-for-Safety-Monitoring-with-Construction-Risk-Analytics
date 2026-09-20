@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+
+body {
+  @apply bg-site-800 text-concrete font-sans antialiased;
+}
+
+/* Hazard tape: the site's own visual language, used once, at the top of the page. */
+.hazard-tape {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #F5C518 0 10px,
+    #0E1116 10px 20px
+  );
+}
+
+.panel {
+  @apply bg-site-700 border border-site-500/60 rounded-sm;
+}
+
+.metric {
+  @apply font-display font-semibold tracking-tight;
+  font-variant-numeric: tabular-nums;
+}
+
+*:focus-visible {
+  outline: 2px solid #F5C518;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #141920; }
+::-webkit-scrollbar-thumb { background: #313A46; border-radius: 2px; }
